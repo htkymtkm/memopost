@@ -3,19 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>メモ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<title>メモ送信</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f2ec;
-    --paper: #fdfcfa;
-    --ink: #1a1714;
-    --muted: #8a8580;
-    --accent: #c85a2a;
-    --border: #e0dbd4;
-    --shadow: rgba(26,23,20,0.08);
+    --bg: #0f0f0f;
+    --surface: #191919;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --ink: #efefef;
+    --muted: #666;
+    --accent: #e8d5a3;
+    --accent2: #c4a96d;
+    --danger: #c0392b;
+    --success: #27ae60;
   }
 
   body {
@@ -25,72 +29,75 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 20px;
+    color: var(--ink);
   }
 
-  .card {
-    background: var(--paper);
+  .app { width: 100%; max-width: 540px; }
+
+  .memo-card {
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    width: 100%;
-    max-width: 560px;
-    box-shadow: 0 2px 16px var(--shadow), 0 1px 3px var(--shadow);
+    border-radius: 6px;
     overflow: hidden;
   }
 
-  .email-bar {
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .to-field {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-
-  .email-label {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    font-weight: 500;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  .email-input {
     flex: 1;
-    border: none;
+  }
+
+  .to-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  #emailTo {
+    flex: 1;
     background: transparent;
+    border: none;
     font-family: 'DM Mono', monospace;
     font-size: 13px;
     color: var(--ink);
     outline: none;
     min-width: 0;
   }
+  #emailTo::placeholder { color: var(--muted); }
 
-  .email-input::placeholder { color: var(--muted); }
-
-  .save-btn {
+  .settings-btn {
     background: none;
     border: none;
     cursor: pointer;
     color: var(--muted);
-    font-size: 16px;
-    padding: 2px 4px;
-    transition: color 0.15s;
-    line-height: 1;
+    font-size: 15px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
+    line-height: 1;
   }
-  .save-btn:hover { color: var(--accent); }
-
-  .memo-area {
-    padding: 20px;
-  }
+  .settings-btn:hover { color: var(--accent); background: var(--surface2); }
 
   #memo {
     width: 100%;
-    min-height: 260px;
-    border: none;
+    min-height: 280px;
+    padding: 20px;
     background: transparent;
+    border: none;
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 15px;
     font-weight: 300;
@@ -99,16 +106,14 @@
     resize: none;
     outline: none;
   }
+  #memo::placeholder { color: #3a3a3a; }
 
-  #memo::placeholder { color: #bbb8b2; }
-
-  .footer {
+  .bottom-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-top: 1px solid var(--border);
-    gap: 8px;
   }
 
   .char-count {
@@ -117,83 +122,311 @@
     color: var(--muted);
   }
 
-  .actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
+  .btn-row { display: flex; gap: 8px; align-items: center; }
 
   .btn-clear {
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 12px;
     color: var(--muted);
     background: none;
-    border: none;
+    border: 1px solid var(--border);
     cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 3px;
-    transition: color 0.15s, background 0.15s;
+    padding: 7px 14px;
+    border-radius: 4px;
+    transition: all 0.15s;
   }
-  .btn-clear:hover { color: var(--ink); background: var(--border); }
+  .btn-clear:hover { color: var(--ink); border-color: var(--muted); }
 
   .btn-send {
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 13px;
     font-weight: 500;
-    color: #fff;
+    color: #0f0f0f;
     background: var(--accent);
     border: none;
     cursor: pointer;
-    padding: 8px 20px;
-    border-radius: 3px;
+    padding: 7px 22px;
+    border-radius: 4px;
     transition: opacity 0.15s, transform 0.1s;
     letter-spacing: 0.03em;
   }
-  .btn-send:hover { opacity: 0.88; }
+  .btn-send:hover { opacity: 0.85; }
   .btn-send:active { transform: scale(0.97); }
-  .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-send:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
+  .setup-hint {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .setup-hint a {
+    color: var(--accent2);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ===== 設定パネル ===== */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.open { display: flex; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+  }
+  .panel-title { font-size: 15px; font-weight: 500; color: var(--accent); }
+  .close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 22px;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.15s;
+  }
+  .close-btn:hover { color: var(--ink); }
+
+  .panel-body { padding: 20px; }
+
+  .steps { margin-bottom: 24px; }
+  .step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    align-items: flex-start;
+  }
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #0f0f0f;
+    background: var(--accent);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-weight: 500;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; color: var(--ink); }
+  .step-desc { font-size: 12px; color: var(--muted); line-height: 1.75; }
+  .step-desc a { color: var(--accent2); text-decoration: underline; text-underline-offset: 2px; }
+  .step-desc code {
+    font-family: 'DM Mono', monospace;
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .field { margin-bottom: 14px; }
+  .field-label {
+    display: block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field-input:focus { border-color: var(--accent2); }
+  .field-input::placeholder { color: var(--muted); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  .btn-save {
+    width: 100%;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0f0f0f;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    padding: 11px;
+    border-radius: 4px;
+    transition: opacity 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .btn-save:hover { opacity: 0.85; }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+  .status-badge.ok { background: rgba(39,174,96,0.15); color: #2ecc71; }
+  .status-badge.ng { background: rgba(192,57,43,0.12); color: #e74c3c; }
+
+  /* トースト */
   .toast {
     position: fixed;
     bottom: 28px;
     left: 50%;
-    transform: translateX(-50%) translateY(8px);
+    transform: translateX(-50%) translateY(10px);
     background: var(--ink);
-    color: #fff;
+    color: #0f0f0f;
     font-family: 'Noto Sans JP', sans-serif;
     font-size: 13px;
-    padding: 10px 20px;
+    font-weight: 500;
+    padding: 10px 22px;
     border-radius: 4px;
     opacity: 0;
     transition: opacity 0.2s, transform 0.2s;
     pointer-events: none;
     white-space: nowrap;
+    z-index: 999;
   }
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  .toast.error { background: #c0392b; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #c0392b; color: #fff; }
+  .toast.success { background: #27ae60; color: #fff; }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <div class="email-bar">
-    <span class="email-label">送り先</span>
-    <input type="email" id="emailTo" class="email-input" placeholder="example@email.com" autocomplete="email">
-    <button class="save-btn" onclick="saveEmail()" title="メールアドレスを保存">💾</button>
-  </div>
-
-  <div class="memo-area">
+<div class="app">
+  <div class="memo-card">
+    <div class="top-bar">
+      <div class="to-field">
+        <span class="to-label">To</span>
+        <input type="email" id="emailTo" placeholder="送り先メールアドレス" autocomplete="email">
+      </div>
+      <button class="settings-btn" onclick="openPanel()" title="EmailJS設定">⚙️</button>
+    </div>
     <textarea id="memo" placeholder="ここにメモを書く…" autofocus oninput="updateCount()"></textarea>
+    <div class="bottom-bar">
+      <span class="char-count" id="count">0 字</span>
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearMemo()">クリア</button>
+        <button class="btn-send" id="sendBtn" onclick="sendMail()">送信</button>
+      </div>
+    </div>
   </div>
+  <p class="setup-hint" id="setupHint">
+    初回のみ <a onclick="openPanel()">EmailJS の設定</a> が必要です（5分）
+  </p>
+</div>
 
-  <div class="footer">
-    <span class="char-count" id="count">0 字</span>
-    <div class="actions">
-      <button class="btn-clear" onclick="clearMemo()">クリア</button>
-      <button class="btn-send" id="sendBtn" onclick="sendMail()">メールで送る</button>
+<!-- 設定パネル -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">EmailJS 初期設定</span>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-body">
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">EmailJS に無料登録する</div>
+            <div class="step-desc">
+              <a href="https://www.emailjs.com/" target="_blank">emailjs.com</a> を開いて「Sign Up Free」でアカウント作成。Googleアカウントでもサインアップできます。
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">メールサービスを追加する</div>
+            <div class="step-desc">
+              ログイン後、左メニュー「Email Services」→「Add New Service」→ Gmailを選択して連携。<br>
+              完了後に表示される <code>Service ID</code> をコピーしておく。
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">テンプレートを作成する</div>
+            <div class="step-desc">
+              左メニュー「Email Templates」→「Create New Template」<br>
+              • Subject（件名）欄に <code>{{subject}}</code><br>
+              • Message（本文）欄に <code>{{message}}</code><br>
+              • To Email 欄に <code>{{to_email}}</code><br>
+              と入力して「Save」。表示される <code>Template ID</code> をコピーしておく。
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Public Key を取得する</div>
+            <div class="step-desc">
+              左メニュー「Account」→「General」タブ→「Public Key」をコピーしておく。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label class="field-label" for="cfgPublicKey">Public Key</label>
+        <input type="text" id="cfgPublicKey" class="field-input" placeholder="例: aBcDeFgHiJkLmNoP_q">
+      </div>
+      <div class="field">
+        <label class="field-label" for="cfgServiceId">Service ID</label>
+        <input type="text" id="cfgServiceId" class="field-input" placeholder="例: service_xxxxxxx">
+      </div>
+      <div class="field">
+        <label class="field-label" for="cfgTemplateId">Template ID</label>
+        <input type="text" id="cfgTemplateId" class="field-input" placeholder="例: template_xxxxxxx">
+      </div>
+
+      <div id="configStatus"></div>
+
+      <hr class="divider">
+
+      <button class="btn-save" onclick="saveConfig()">保存してメモ画面に戻る</button>
     </div>
   </div>
 </div>
@@ -201,17 +434,49 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const STORAGE_KEY = 'memo_mail_email';
+  const KEYS = {
+    email:      'mmapp_email',
+    publicKey:  'mmapp_pubkey',
+    serviceId:  'mmapp_service',
+    templateId: 'mmapp_template',
+  };
 
-  // 保存済みメールアドレスを復元
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) document.getElementById('emailTo').value = saved;
+  window.addEventListener('DOMContentLoaded', () => {
+    restore();
+    updateSetupHint();
+    updateConfigStatus();
+  });
 
-  function saveEmail() {
-    const email = document.getElementById('emailTo').value.trim();
-    if (!email) return;
-    localStorage.setItem(STORAGE_KEY, email);
-    showToast('メールアドレスを保存しました');
+  function ls(key, val) {
+    if (val === undefined) return localStorage.getItem(key) || '';
+    localStorage.setItem(key, val);
+  }
+
+  function restore() {
+    const email    = ls(KEYS.email);
+    const pubkey   = ls(KEYS.publicKey);
+    const service  = ls(KEYS.serviceId);
+    const template = ls(KEYS.templateId);
+
+    if (email)    document.getElementById('emailTo').value      = email;
+    if (pubkey)   { emailjs.init(pubkey); document.getElementById('cfgPublicKey').value  = pubkey; }
+    if (service)  document.getElementById('cfgServiceId').value  = service;
+    if (template) document.getElementById('cfgTemplateId').value = template;
+  }
+
+  function isConfigured() {
+    return ls(KEYS.publicKey) && ls(KEYS.serviceId) && ls(KEYS.templateId);
+  }
+
+  function updateSetupHint() {
+    document.getElementById('setupHint').style.display = isConfigured() ? 'none' : 'block';
+  }
+
+  function updateConfigStatus() {
+    const el = document.getElementById('configStatus');
+    el.innerHTML = isConfigured()
+      ? '<span class="status-badge ok">✓ 設定済み — 自動送信が使えます</span>'
+      : '<span class="status-badge ng">未設定</span>';
   }
 
   function updateCount() {
@@ -228,29 +493,77 @@
     }
   }
 
-  function sendMail() {
-    const to = document.getElementById('emailTo').value.trim();
+  async function sendMail() {
+    const to   = document.getElementById('emailTo').value.trim();
     const body = document.getElementById('memo').value.trim();
 
-    if (!to) { showToast('送り先のメールアドレスを入力してください', true); return; }
-    if (!body) { showToast('メモが空です', true); return; }
+    if (!to)   { showToast('送り先を入力してください', 'error'); return; }
+    if (!body) { showToast('メモが空です', 'error'); return; }
 
-    // 先頭1行をサブジェクトとして使用（空白の場合は「メモ」）
-    const firstLine = body.split('\n')[0].slice(0, 60) || 'メモ';
+    ls(KEYS.email, to);
 
-    const mailtoLink = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(firstLine)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
+    if (!isConfigured()) {
+      showToast('先にEmailJSの設定を完了してください', 'error');
+      openPanel();
+      return;
+    }
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.textContent = '送信中…';
+
+    const subject = body.split('\n')[0].slice(0, 60) || 'メモ';
+
+    try {
+      await emailjs.send(
+        ls(KEYS.serviceId),
+        ls(KEYS.templateId),
+        { to_email: to, subject, message: body }
+      );
+      showToast('送信しました ✓', 'success');
+      document.getElementById('memo').value = '';
+      updateCount();
+    } catch (err) {
+      console.error(err);
+      showToast('送信失敗。設定を確認してください', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '送信';
+    }
   }
 
-  function showToast(msg, isError = false) {
+  function saveConfig() {
+    const pubkey   = document.getElementById('cfgPublicKey').value.trim();
+    const service  = document.getElementById('cfgServiceId').value.trim();
+    const template = document.getElementById('cfgTemplateId').value.trim();
+
+    if (!pubkey || !service || !template) {
+      showToast('3つすべて入力してください', 'error'); return;
+    }
+
+    ls(KEYS.publicKey, pubkey);
+    ls(KEYS.serviceId, service);
+    ls(KEYS.templateId, template);
+    emailjs.init(pubkey);
+
+    updateSetupHint();
+    updateConfigStatus();
+    showToast('設定を保存しました', 'success');
+    setTimeout(closePanel, 800);
+  }
+
+  function openPanel()  { document.getElementById('overlay').classList.add('open'); }
+  function closePanel() { document.getElementById('overlay').classList.remove('open'); }
+  function overlayClick(e) { if (e.target === document.getElementById('overlay')) closePanel(); }
+
+  function showToast(msg, type = '') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast' + (isError ? ' error' : '');
+    t.className = 'toast' + (type ? ' ' + type : '');
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2400);
+    setTimeout(() => t.classList.remove('show'), 2800);
   }
 
-  // Cmd/Ctrl+Enter でそのまま送信
   document.getElementById('memo').addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') sendMail();
   });
