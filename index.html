@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -8,10 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="メモ送信">
 <title>メモ送信</title>
-
-<!-- ホーム画面アイコン（SVGをbase64化したPNG相当をインラインで生成） -->
-
-<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjNDQ4OGZmIi8+PHJlY3QgeD0iNDAiIHk9IjQwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjcwIiByeD0iOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjgiLz48cGF0aCBkPSJNNjAgNzBoNjBNNjAgODhoNDAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSI3IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNOTAgMTEwdjE2bTAgMGwtMTQtMTRtMTQgMTQgMTQtMTQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSI3IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=">
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -32,16 +27,12 @@
     --success: #2e9e5b;
   }
 
-  html, body {
-    height: 100%;
-    overflow: hidden; /* ページ全体のスクロールを禁止 */
-  }
+  html, body { height: 100%; overflow: hidden; }
 
   body {
     background: var(--bg);
     font-family: 'Noto Sans JP', sans-serif;
     color: var(--ink);
-    /* iPhone セーフエリア対応 */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
@@ -50,7 +41,6 @@
     flex-direction: column;
   }
 
-  /* ===== メインレイアウト: 画面全体を占める固定フォーム ===== */
   .app {
     flex: 1;
     display: flex;
@@ -72,7 +62,6 @@
     min-height: 0;
   }
 
-  /* 宛先バー */
   .top-bar {
     display: flex;
     align-items: center;
@@ -103,7 +92,6 @@
   }
   #emailTo::placeholder { color: var(--muted); }
 
-  /* 設定ボタン（フラットSVGアイコン） */
   .settings-btn {
     background: none;
     border: none;
@@ -121,7 +109,6 @@
   .settings-btn:hover, .settings-btn:active { background: var(--surface2); color: var(--accent); }
   .settings-btn svg { width: 20px; height: 20px; }
 
-  /* メモエリア: 残りの高さをすべて使う */
   #memo {
     flex: 1;
     width: 100%;
@@ -140,7 +127,6 @@
   }
   #memo::placeholder { color: #c5cad3; }
 
-  /* フッター */
   .bottom-bar {
     display: flex;
     align-items: center;
@@ -194,21 +180,15 @@
   .btn-send:active { transform: scale(0.97); }
   .btn-send:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
-  /* 初回設定ヒント */
   .setup-hint {
     text-align: center;
     font-size: 12px;
     color: var(--muted);
     flex-shrink: 0;
   }
-  .setup-hint a {
-    color: var(--accent);
-    cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
+  .setup-hint a { color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 
-  /* ===== 設定パネル ===== */
+  /* 設定パネル */
   .overlay {
     display: none;
     position: fixed;
@@ -354,7 +334,6 @@
   .status-badge.ok { background: rgba(46,158,91,0.12); color: #2e9e5b; }
   .status-badge.ng { background: rgba(229,57,53,0.1); color: #e53935; }
 
-  /* トースト */
   .toast {
     position: fixed;
     bottom: calc(28px + env(safe-area-inset-bottom));
@@ -377,47 +356,37 @@
   .toast.error { background: var(--danger); }
   .toast.success { background: var(--success); }
 </style>
-
 </head>
 <body>
 
 <div class="app">
   <div class="memo-card">
+    <div class="top-bar">
+      <span class="to-label">To</span>
+      <input type="email" id="emailTo" placeholder="送り先メールアドレス" autocomplete="email">
+      <button class="settings-btn" onclick="openPanel()" title="EmailJS設定" aria-label="設定">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
 
-```
-<!-- 宛先バー -->
-<div class="top-bar">
-  <span class="to-label">To</span>
-  <input type="email" id="emailTo" placeholder="送り先メールアドレス" autocomplete="email">
-  <!-- 設定ボタン: フラットSVGアイコン（歯車） -->
-  <button class="settings-btn" onclick="openPanel()" title="EmailJS設定" aria-label="設定">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-    </svg>
-  </button>
-</div>
+    <textarea id="memo" placeholder="ここにメモを書く…" autofocus oninput="updateCount()"></textarea>
 
-<!-- メモエリア -->
-<textarea id="memo" placeholder="ここにメモを書く…" autofocus oninput="updateCount()"></textarea>
-
-<!-- フッター -->
-<div class="bottom-bar">
-  <span class="char-count" id="count">0 字</span>
-  <div class="btn-row">
-    <button class="btn-clear" onclick="clearMemo()">クリア</button>
-    <button class="btn-send" id="sendBtn" onclick="sendMail()">
-      <!-- 送信アイコン（紙飛行機） -->
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"/>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-      </svg>
-      送信
-    </button>
-  </div>
-</div>
-```
-
+    <div class="bottom-bar">
+      <span class="char-count" id="count">0 字</span>
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearMemo()">クリア</button>
+        <button class="btn-send" id="sendBtn" onclick="sendMail()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          送信
+        </button>
+      </div>
+    </div>
   </div>
 
   <p class="setup-hint" id="setupHint">
@@ -425,8 +394,7 @@
   </p>
 </div>
 
-<!-- 設定パネル（下からスライド） -->
-
+<!-- 設定パネル -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="panel">
     <div class="panel-header">
@@ -439,86 +407,110 @@
       </button>
     </div>
     <div class="panel-body">
-
-```
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <div class="step-title">EmailJS に無料登録する</div>
-        <div class="step-desc">
-          <a href="https://www.emailjs.com/" target="_blank">emailjs.com</a> を開いて「Sign Up Free」でアカウント作成。Googleアカウントでも可。
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">EmailJS に無料登録する</div>
+            <div class="step-desc"><a href="https://www.emailjs.com/" target="_blank">emailjs.com</a> を開いて「Sign Up Free」でアカウント作成。Googleアカウントでも可。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">メールサービスを追加する</div>
+            <div class="step-desc">左メニュー「Email Services」→「Add New Service」→ Gmail を連携。完了後の <code>Service ID</code> をコピー。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">テンプレートを作成する</div>
+            <div class="step-desc">「Email Templates」→「Create New Template」<br>• Subject 欄に <code>{{subject}}</code><br>• Message 欄に <code>{{message}}</code><br>• To Email 欄に <code>{{to_email}}</code><br>と入力して保存。<code>Template ID</code> をコピー。</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">Public Key を取得する</div>
+            <div class="step-desc">「Account」→「General」タブ→「Public Key」をコピー。</div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <div class="step-title">メールサービスを追加する</div>
-        <div class="step-desc">
-          左メニュー「Email Services」→「Add New Service」→ Gmail を連携。<br>
-          完了後の <code>Service ID</code> をコピー。
-        </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label class="field-label" for="cfgPublicKey">Public Key</label>
+        <input type="text" id="cfgPublicKey" class="field-input" placeholder="例: aBcDeFgHiJkLmNoP_q" autocomplete="off">
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <div class="step-title">テンプレートを作成する</div>
-        <div class="step-desc">
-          「Email Templates」→「Create New Template」<br>
-          • Subject 欄に <code>{{subject}}</code><br>
-          • Message 欄に <code>{{message}}</code><br>
-          • To Email 欄に <code>{{to_email}}</code><br>
-          と入力して保存。<code>Template ID</code> をコピー。
-        </div>
+      <div class="field">
+        <label class="field-label" for="cfgServiceId">Service ID</label>
+        <input type="text" id="cfgServiceId" class="field-input" placeholder="例: service_xxxxxxx" autocomplete="off">
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <div class="step-title">Public Key を取得する</div>
-        <div class="step-desc">
-          「Account」→「General」タブ→「Public Key」をコピー。
-        </div>
+      <div class="field">
+        <label class="field-label" for="cfgTemplateId">Template ID</label>
+        <input type="text" id="cfgTemplateId" class="field-input" placeholder="例: template_xxxxxxx" autocomplete="off">
       </div>
+
+      <div id="configStatus"></div>
+      <hr class="divider">
+
+      <button class="btn-save" onclick="saveConfig()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        保存してメモ画面に戻る
+      </button>
     </div>
-  </div>
-
-  <hr class="divider">
-
-  <div class="field">
-    <label class="field-label" for="cfgPublicKey">Public Key</label>
-    <input type="text" id="cfgPublicKey" class="field-input" placeholder="例: aBcDeFgHiJkLmNoP_q" autocomplete="off">
-  </div>
-  <div class="field">
-    <label class="field-label" for="cfgServiceId">Service ID</label>
-    <input type="text" id="cfgServiceId" class="field-input" placeholder="例: service_xxxxxxx" autocomplete="off">
-  </div>
-  <div class="field">
-    <label class="field-label" for="cfgTemplateId">Template ID</label>
-    <input type="text" id="cfgTemplateId" class="field-input" placeholder="例: template_xxxxxxx" autocomplete="off">
-  </div>
-
-  <div id="configStatus"></div>
-
-  <hr class="divider">
-
-  <button class="btn-save" onclick="saveConfig()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-    保存してメモ画面に戻る
-  </button>
-</div>
-```
-
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+  // ── ホーム画面アイコンをCanvasでPNG生成してセット ──
+  (function() {
+    const size = 180;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+
+    // 背景（角丸はiOSが自動でマスクするので不要だが念のため）
+    ctx.fillStyle = '#4488ff';
+    ctx.fillRect(0, 0, size, size);
+
+    // 書類アイコン（白）
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 10;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    // 書類の外枠
+    ctx.beginPath();
+    ctx.roundRect(38, 30, 104, 80, 10);
+    ctx.stroke();
+
+    // 横線 × 2
+    ctx.beginPath();
+    ctx.moveTo(58, 62); ctx.lineTo(122, 62);
+    ctx.moveTo(58, 82); ctx.lineTo(100, 82);
+    ctx.stroke();
+
+    // 送信矢印（↑ 下から上）
+    ctx.beginPath();
+    ctx.moveTo(90, 152); ctx.lineTo(90, 118);   // 縦線
+    ctx.moveTo(70, 132); ctx.lineTo(90, 112);    // 左斜め
+    ctx.moveTo(110, 132); ctx.lineTo(90, 112);   // 右斜め
+    ctx.stroke();
+
+    const link = document.createElement('link');
+    link.rel = 'apple-touch-icon';
+    link.href = c.toDataURL('image/png');
+    document.head.appendChild(link);
+  })();
+
+  // ── アプリロジック ──
   const KEYS = {
     email:      'mmapp_email',
     publicKey:  'mmapp_pubkey',
@@ -577,6 +569,8 @@
     }
   }
 
+  const SEND_ICON = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+
   async function sendMail() {
     const to   = document.getElementById('emailTo').value.trim();
     const body = document.getElementById('memo').value.trim();
@@ -589,7 +583,7 @@
     }
     const btn = document.getElementById('sendBtn');
     btn.disabled = true;
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>送信中…`;
+    btn.innerHTML = SEND_ICON + '送信中…';
     const subject = body.split('\n')[0].slice(0, 60) || 'メモ';
     try {
       await emailjs.send(ls(KEYS.serviceId), ls(KEYS.templateId), { to_email: to, subject, message: body });
@@ -601,7 +595,7 @@
       showToast('送信失敗。設定を確認してください', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>送信`;
+      btn.innerHTML = SEND_ICON + '送信';
     }
   }
 
@@ -636,6 +630,5 @@
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') sendMail();
   });
 </script>
-
 </body>
 </html>
